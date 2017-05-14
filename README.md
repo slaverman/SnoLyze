@@ -73,6 +73,8 @@ Attribute Operators | <<  404684003 \|Clinical finding\| : <<  47429007 \|Associ
 Concrete Values	| < 373873005 \|Pharmaceutical / biologic product\| : 209999999104 \|Has trade name\| = "PANADOL"| No
 Reverse Attributes | <  91723000 \|Anatomical structure\| : R  363698007 \|Finding site\|  = <  125605004 \|Fracture of bone\| | Yes
 Any Attribute Name and Value | <  404684003 \|Clinical finding\| : * =  79654002 \|Edema\| | Yes
+Attribute Cardinality | < 373873005 \|Pharmaceutical / biologic product\| : [1..3] 127489000 \|Has active ingredient\| = < 105590001 \|Substance\| | Yes (but not for reverse attributes
+Attribute Cardinality in Groups | < 373873005 \|Pharmaceutical / biologic product\| : [1..3] { 127489000 \|Has active ingredient\| = < 105590001 \|Substance\| }	| No
 Simple Conjunction | <  19829001 \|Disorder of lung\|  AND <  301867009 \|Edema of trunk\| | Yes
 Simple Disjunction | <  19829001 \|Disorder of lung\|  OR <  301867009 \|Edema of trunk\| | Yes
 Attribute Conjunction | <  404684003 \|Clinical finding\| : 363698007 \|Finding site\|  = <<  39057004 \|Pulmonary valve structure\| , 116676008 \|Associated morphology\|  = <<  415582006 \|Stenosis\| | Yes
