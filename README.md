@@ -1,15 +1,12 @@
 # SnoLyze
-
-## Overview
-SnoLyze is a SNOMED CT Expression Constraint Language Execution Engine in R to support data analytics over SNOMED CT enabled data. It currently supports version 1.2 of the Expression Constraint Language in combination with SNOMED CT Release Format 2.
+SnoLyze is a lightweigth and fast SNOMED CT Expression Constraint Language Execution Engine in R to support data analytics over SNOMED CT enabled data. 
 
 SnoLyze consists of three functions:
  - `initialize()` initializes SnoLyze
  - `execute()` executes an expression
  - `getTransitiveClosure()` returns the initialized transitive closure file
 
-
-## Install
+## Installation
 ```r
 # requires devtools
 # install.packages("devtools")
@@ -36,6 +33,7 @@ execute("< 19829001 |Disorder of lung| : 116676008 |Associated morphology|  =  7
 #  [1] 11468004          19242006          67782005          89687005          95437004          162970000         196151000        
 #  [8] 196152007         196153002         233705000         233707008         233708003         233712009         240629003        
 # [15] 276637009         405276000         698638005         698640000         700458001         10674871000119105
+# run time: 23 ms
 
 # select all cases in 'data' with a type of 'Diabetes mellitus', 
 # but not a type of 'Diabetes mellitus during pregnancy, childbirth and the puerperium'
@@ -53,6 +51,6 @@ data[sctid %in% result]
 #   61156 2013-10-05 359642000       Diabetes mellitus type 2 in nonobese (disorder)
 #   61157 2014-09-04 359642000       Diabetes mellitus type 2 in nonobese (disorder)
 #   61158 2015-08-03 359642000       Diabetes mellitus type 2 in nonobese (disorder)
-
-
 ```
+## Supported features
+It currently supports version 1.2 of the Expression Constraint Language in combination with SNOMED CT Release Format 2.
