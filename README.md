@@ -1,7 +1,7 @@
 # SnoLyze
 
 ## Overview
-SnoLyze is a SNOMED CT Expression Constraint Language Execution Engine in R to support data analytics over SNOMED CT enabled data.
+SnoLyze is a SNOMED CT Expression Constraint Language Execution Engine in R to support data analytics over SNOMED CT enabled data. It currently supports version 1.2 of the Expression Constraint Language in combination with SNOMED CT Release Format 2.
 
 SnoLyze consists of three functions:
  - `initialize()` initializes SnoLyze
