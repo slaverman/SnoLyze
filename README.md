@@ -53,4 +53,34 @@ data[sctid %in% result]
 #   61158 2015-08-03 359642000       Diabetes mellitus type 2 in nonobese (disorder)
 ```
 ## Supported features
-It currently supports version 1.2 of the Expression Constraint Language in combination with SNOMED CT Release Format 2.
+SnoLyze currently supports the brief and long syntax of the Expression Constraint Language version 1.2 in combination with SNOMED CT Release Format 2.
+
+Feature | Example | Supported
+---------- | ----------------------- | --
+Self | 404684003 \|Clinical finding\| | Yes
+Descendant of | <  404684003 \|Clinical finding\| | Yes
+Descendant or Self of | <<  404684003 \|Clinical finding\| | Yes
+Child of | <!  404684003 \|Clinical finding\| | Yes
+Ancestor of | >  40541001 \|Acute pulmonary edema\| | Yes
+Ancestor or Self of | >>  40541001 \|Acute pulmonary edema\| | Yes
+Parent of | >!  40541001 \|Acute pulmonary edema\| | Yes
+Member of | ^ 700043003 \|Example problem list concepts reference set\| | No
+Any | * | Yes
+Attributes | <  19829001 \|Disorder of lung\| : 116676008 \|Associated morphology\|  =  79654002 \|Edema\| | Yes
+Attribute Groups | <  404684003 \|Clinical finding\| : {363698007 \|Finding site\|  = <<  39057004 \|Pulmonary valve structure\| , 116676008 \|Associated morphology\|  = <<  415582006 \|Stenosis\| }, {363698007 \|Finding site\|  = <<  53085002 \|Right ventricular structure\| , 116676008 \|Associated morphology\|  = <<  56246009 \|Hypertrophy\| } | Yes
+Nested Attributes | <  404684003 \|Clinical finding\| 47429007 \|Associated with\|  = (< 404684003 \|Clinical finding\| : 116676008 \|Associated morphology\|  = <<  55641003 \|Infarct\| ) | Yes
+Attribute Operators | <<  404684003 \|Clinical finding\| : <<  47429007 \|Associated with\|  = <<  267038008 \|Edema\| |	Yes
+Concrete Values	| < 373873005 \|Pharmaceutical / biologic product\| : 209999999104 \|Has trade name\| = "PANADOL"| No
+Reverse Attributes | <  91723000 \|Anatomical structure\| : R  363698007 \|Finding site\|  = <  125605004 \|Fracture of bone\| | Yes
+Any Attribute Name and Value | <  404684003 \|Clinical finding\| : * =  79654002 \|Edema\| | Yes
+Simple Conjunction | <  19829001 \|Disorder of lung\|  AND <  301867009 \|Edema of trunk\| | Yes
+Simple Disjunction | <  19829001 \|Disorder of lung\|  OR <  301867009 \|Edema of trunk\| | Yes
+Attribute Conjunction | <  404684003 \|Clinical finding\| : 363698007 \|Finding site\|  = <<  39057004 \|Pulmonary valve structure\| , 116676008 \|Associated morphology\|  = <<  415582006 \|Stenosis\| | Yes
+Attribute Disjunction | <  404684003 \|Clinical finding\| : 116676008 \|Associated morphology\|  = <<  55641003 \|Infarct\|  OR 42752001 \|Due to\|  = <<  22298006 \|Myocardial infarction\| | Yes
+Attribute Group Conjunction and Disjunction | <  404684003 \|Clinical finding\| : { 363698007 \|Finding site\|  = <<  39057004 \|Pulmonary valve structure\| , 116676008 \|Associated morphology\|  = <<  415582006 \|Stenosis\| } OR { 363698007 \|Finding site\|  = <<  53085002 \|Right ventricular structure\| , 116676008 \|Associated morphology\|  = <<  56246009 \|Hypertrophy\| } | Yes
+Attribute Value Conjunction | <  404684003 \|Clinical finding\| :  116676008 \|Associated morphology\|  = (<<  56208002 \|Ulcer\|  AND <<  50960005 \|Hemorrhage\| ) | Yes
+Attribute Value Disjunction | <  404684003 \|Clinical finding\| :  116676008 \|Associated morphology\|  = (<<  56208002 \|Ulcer\|  OR <<  50960005 \|Hemorrhage\| ) | Yes
+Exclusion of Simple Expressions	| <<  19829001 \|Disorder of lung\|  MINUS <<  301867009 \|Edema of trunk\| | Yes
+Exclusion of Attribute Values | <  404684003 \|Clinical finding\| :  116676008 \|Associated morphology\|  = ((<<  56208002 \|Ulcer\|  AND <<  50960005 \|Hemorrhage\| ) MINUS <<  26036001 \|Obstruction\| ) | Yes
+Not Equal to Attribute Value | <  404684003 \|Clinical finding\| : 116676008 \|Associated morphology\|  != <<  26036001 \|Obstruction\| | Yes
+
