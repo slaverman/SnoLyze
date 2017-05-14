@@ -3,7 +3,7 @@
 ## Overview
 SNOMED CT Expression Constraint Language Execution Engine in R. 
 
-SnoLyze consists three functions:
+SnoLyze consists of three functions:
  - `initialize()` initializes SnoLyze
  - `execute()` executes an expression
  - `getTransitiveClosure()` returns the initialized transitive closure file
