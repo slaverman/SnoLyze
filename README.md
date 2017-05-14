@@ -18,10 +18,10 @@ devtools::install_github("slaverman/SnoLyze")
 library(SnoLyze)
 
 # without transitive closure file, takes around 70 seconds to read in the relationship file and create the transitive closure file
-initialize("PATH_TO_SNOMED_CT_RELATIONSHIP_FILE")
+launch("PATH_TO_SNOMED_CT_RELATIONSHIP_FILE")
 
 # with transitive closure file, takes around 10 seconds to read in the relationship and transitive closure files
-initialize("PATH_TO_SNOMED_CT_RELATIONSHIP_FILE", "PATH_TO_TRANSITIVE_CLOSURE_FILE")
+launch("PATH_TO_SNOMED_CT_RELATIONSHIP_FILE", "PATH_TO_TRANSITIVE_CLOSURE_FILE")
 
 # get transitive closure file, to save it with your favourite filewriter (example below uses fwrite of the data.table package)
 transitive <- getTransitiveClosure()
