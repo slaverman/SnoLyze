@@ -14,9 +14,11 @@ validate <- function(exp)
 
 createParser <- function()
 {
-  parser <- v8()
-  parser$source("inst/js/grammar.js") #extended with new rootconcept
-  parser$source("inst/js/apg-lib.js")
+ parser <- v8()
+  grammar <- system.file("js", "grammar.js", package="SnoLyze")
+  apg <- system.file("js", "apg-lib.js", package="SnoLyze")
+  parser$source(grammar) #extended with new rootconcept
+  parser$source(apg)
 
   parser$eval("var grammar = new generatedGrammar();")
   parser$eval("var parser = new apglib.parser();")
