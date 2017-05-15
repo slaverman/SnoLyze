@@ -6,11 +6,13 @@ rel <- NULL
 transitiveclosure <- NULL
 parser <- NULL
 rootconcept <- as.integer64("138875005")
+packagename <- "SnoLyze"
 
 #' @export
 launch <- function(sourceRel, sourceTrans = NULL)
 {
-  env <- loadNamespace("SnoLyze")
+  # add check if RF2 file
+  env <- loadNamespace(packagename)
   unlockBinding("transitiveclosure", env)
   unlockBinding("rel", env)
   unlockBinding("parser", env)

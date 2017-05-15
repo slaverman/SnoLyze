@@ -103,8 +103,20 @@ emptyVector <- function()
 # Cast to data.table, because the setoperations R base are converting integer64 to numerics, so lost of precision, so lost of valid sctid
 conjunction <- function(a, b)
 {
+  #return(data.table(b))
   return(fintersect(data.table(a), setnames(data.table(b), "b", "a"))[,a])
 }
+
+conjunctionList <- function(a) 
+{
+  return(Reduce(fintersect, lapply(a, data.table))[,V1])
+}
+
+disjunctionList <- function(a)
+{
+  return(Reduce(funion, lapply(a, data.table))[,V1])
+}
+
 disjunction <- function(a, b)
 {
   return(funion(data.table(a), setnames(data.table(b), "b", "a"))[,a])

@@ -4285,6 +4285,10 @@ module.exports = function() {
     }
     return ret;
   }
+    this.getRecords = function()
+    {
+        return records; // TODO export AST to R and use callback function instead of toRcode()
+    }
 this.toRcode = function() {
     var display = utils.charsToDec;
     display = utils.charsToAscii;
@@ -4311,7 +4315,7 @@ this.toRcode = function() {
              {
                   syntax += name + " = ('" + display(chars, rec.phraseIndex, rec.phraseLength) + "')" ; //quotes to make sure that it is a string
              }
-          if(name == "expressionConstraint" || name == "simpleExpressionConstraint" || name == "eclRefinement" || name == "subRefinement" || name == "eclAttributeSet" || name == "subAttributeSet" || name == "eclAttribute" || name == "subExpressionConstraint" || name == "eclFocusConcept" || name == "eclAttributeName" || name == "conjunctionExpressionConstraint" || name == "compoundExpressionConstraint" || name == "disjunctionExpressionConstraint" || name == "exclusionExpressionConstraint" || name == "eclAttributeGroup")
+          if(name == "expressionConstraint" || name == "simpleExpressionConstraint" || name == "eclRefinement" || name == "subRefinement" || name == "eclAttributeSet" || name == "subAttributeSet" || name == "eclAttribute"  || name == "eclFocusConcept" || name == "eclAttributeName" || name == "conjunctionExpressionConstraint" || name == "compoundExpressionConstraint" || name == "disjunctionExpressionConstraint" || name == "exclusionExpressionConstraint" || name == "eclAttributeGroup")
               {
                   if(name == "eclAttributeGroup")
                       {
@@ -4325,10 +4329,26 @@ this.toRcode = function() {
                           syntax += "group = TRUE, ";
                       }
               }
-          if(name == "conjunctionAttributeSet" || name == "disjunctionAttributeSet" || name == "conjunctionRefinementSet" || name == "disjunctionRefinementSet")
+          if(name == "conjunctionRefinementSet" || name == "disjunctionRefinementSet")
+              {
+                   syntax += ", " + name + " = " + name + "(list(";
+              }
+          if(name == "conjunctionAttributeSet" || name == "disjunctionAttributeSet")
              {
-                  syntax += ", " + name + " = " + name + "(";
+                  syntax += ", " + name + " = " + name + "(list(";
              }
+          if(name == "subExpressionConstraint")
+              {
+                  var previous = records[index - 1].name;
+                  if(previous == "conjunction" || previous == "disjunction")
+                  {
+                      syntax += name + " = list(" + name + "(";
+                  }
+                  else
+                      {
+                          syntax += name + " = " + name + "(";
+                      }
+              }
           if(name == "conjunction" || name == "disjunction" || name == "exclusion")
               {
                   //Ugly solution, need to find something nicer.... TODO
@@ -4336,6 +4356,10 @@ this.toRcode = function() {
                   if(previous == "subExpressionConstraint")
                   {
                       syntax += ", " + name + "_";
+                  }
+                  if(previous == "subAttributeSet" || previous == "subRefinement")
+                  {
+                      syntax += ",";
                   }
               }
            if(name == "expressionComparisonOperator")
@@ -4354,7 +4378,7 @@ this.toRcode = function() {
       else 
       {
           var name = rec.name;
-           if(name == "subExpressionConstraint" || name == "eclFocusConcept" || name == "expressionConstraint" || name == "query" || name == "refinedExpressionConstraint" || name == "conceptReference" || name == "eclRefinement" || name == "subRefinement" || name == "eclAttributeSet" || name == "subAttributeSet" || name == "conjunctionAttributeSet" || name == "disjunctionAttributeSet" || name == "conjunctionRefinementSet" || name == "disjunctionRefinementSet" || name == "eclAttribute" || name == "conjunctionExpressionConstraint" || name == "disjunctionExpressionConstraint" || name == "exclusionExpressionConstraint" || name == "compoundExpressionConstraint" || name == "eclAttributeGroup")
+           if(name == "subExpressionConstraint" || name == "eclFocusConcept" || name == "expressionConstraint" || name == "query" || name == "refinedExpressionConstraint" || name == "conceptReference" || name == "eclRefinement" || name == "subRefinement" || name == "eclAttributeSet" || name == "subAttributeSet" || name == "eclAttribute" || name == "exclusionExpressionConstraint" || name == "compoundExpressionConstraint" || name == "eclAttributeGroup")
              {
                  if(name == "eclAttributeGroup")
                     {
@@ -4365,6 +4389,10 @@ this.toRcode = function() {
           if(name == "simpleExpressionConstraint" || name == "eclAttributeName")
               {
                   syntax += "),";
+              }
+          if(name == "conjunctionAttributeSet" || name == "disjunctionAttributeSet" || name == "conjunctionRefinementSet" || name == "disjunctionRefinementSet" || name == "conjunctionExpressionConstraint" || name == "disjunctionExpressionConstraint")
+              {
+                  syntax += "))"; //close list
               }
       }
     });

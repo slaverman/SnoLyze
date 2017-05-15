@@ -42,11 +42,11 @@ compoundExpressionConstraint <- function(conjunctionExpressionConstraint = NULL 
 }
 conjunctionExpressionConstraint <- function(subExpressionConstraint ,conjunction_subExpressionConstraint)
 {
-  return(conjunction(subExpressionConstraint, conjunction_subExpressionConstraint))
+  return(conjunction(subExpressionConstraint, conjunctionList(conjunction_subExpressionConstraint)))
 }
 disjunctionExpressionConstraint <- function(subExpressionConstraint, disjunction_subExpressionConstraint)
 {
-   return(disjunction(subExpressionConstraint, disjunction_subExpressionConstraint))
+   return(disjunction(subExpressionConstraint, disjunctionList(disjunction_subExpressionConstraint)))
 }
 exclusionExpressionConstraint <- function(subExpressionConstraint, exclusion_subExpressionConstraint)
 {
@@ -140,11 +140,11 @@ eclRefinement <- function(subRefinement, conjunctionRefinementSet = NULL, disjun
 }
 conjunctionRefinementSet <- function(subRefinement)
 {
-  return(subRefinement)
+  return(conjunctionList(subRefinement))
 }
 disjunctionRefinementSet <- function(subRefinement)
 {
-  return(subRefinement)
+  return(disjunctionList(subRefinement))
 }
 subRefinement <- function(eclAttributeSet = NULL, eclAttributeGroup = NULL, eclRefinement = NULL)
 {
@@ -178,11 +178,11 @@ eclAttributeSet <- function(subAttributeSet, conjunctionAttributeSet = NULL, dis
 }
 conjunctionAttributeSet <- function(subAttributeSet)
 {
-  return(subAttributeSet)
+  return(conjunctionList(subAttributeSet))
 }
 disjunctionAttributeSet <- function(subAttributeSet)
 {
-  return(subAttributeSet)
+  return(disjunctionList(subAttributeSet))
 }
 subAttributeSet <- function(eclAttribute = NULL, eclAttributeSet = NULL)
 {
