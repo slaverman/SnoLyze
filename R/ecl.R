@@ -52,9 +52,10 @@ exclusionExpressionConstraint <- function(subExpressionConstraint, exclusion_sub
 {
   return(exclusion(subExpressionConstraint, exclusion_subExpressionConstraint))
 }
-dottedExpressionConstraint <- function(subExpressionConstraint ,dot ,attributeOperator, eclAttributeName)
+dottedExpressionConstraint <- function(subExpressionConstraint, constraintOperator = NULL, eclAttributeName)
 {
-  # TODO
+  # TODO 1*(ws dot ws [attributeOperator ws] eclAttributeName)
+  return(eclAttribute(group = FALSE, minValue = NULL, maxValue = NULL, reverseFlag = TRUE, constraintOperator = constraintOperator, eclAttributeName, expressionComparisonOperator = TRUE, subExpressionConstraint))
 }
 subExpressionConstraint <- function(constraintOperator = NULL, memberOf = NULL, eclFocusConcept = NULL, expressionConstraint = NULL)
 {
@@ -121,7 +122,7 @@ conceptReference <- function(conceptId)
 }
 wildCard <- function(any)
 {
-  return(self(any))
+  return(self("*"))
 }
 eclRefinement <- function(subRefinement, conjunctionRefinementSet = NULL, disjunctionRefinementSet = NULL)
 {

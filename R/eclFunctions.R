@@ -1,6 +1,6 @@
 self <- function(sctid) # INPUT MUST BE A STRING OTHERWISE 999480561000087100 WILL BECOME 999480561000087040
 {
-  if(sctid == "*")
+  if(sctid == "*") # *, ANY
   {
     return(any())
   }
@@ -103,11 +103,10 @@ emptyVector <- function()
 # Cast to data.table, because the setoperations R base are converting integer64 to numerics, so lost of precision, so lost of valid sctid
 conjunction <- function(a, b)
 {
-  #return(data.table(b))
   return(fintersect(data.table(a), setnames(data.table(b), "b", "a"))[,a])
 }
 
-conjunctionList <- function(a) 
+conjunctionList <- function(a)
 {
   return(Reduce(fintersect, lapply(a, data.table))[,V1])
 }
@@ -163,6 +162,7 @@ getAtt <- function(group, reverseFlag,constraintOperator, eclAttributeName, expr
 cardinalityHandler <- function(group, min, max, att, reverseFlag)
 {
   min <- as.numeric(min)# prevent that with "2", => 10 is not missed (min is always an numeric so safe)
+
   if(reverseFlag)
   {
     if(group)
@@ -198,7 +198,7 @@ cardinalityHandler <- function(group, min, max, att, reverseFlag)
   }
   else
   {
-    as.numeric(max)
+    max <- as.numeric(max)
     if(min > max)
     {
       return(emptyVector()) # is valid according to the grammar, always an emtpy vector

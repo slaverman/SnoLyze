@@ -4290,8 +4290,8 @@ module.exports = function() {
         return records; // TODO export AST to R and use callback function instead of toRcode()
     }
 this.toRcode = function() {
-    var display = utils.charsToDec;
-    display = utils.charsToAscii;
+    //var display = utils.charsToDec;
+    var display = utils.charsToAscii;
     var syntax = "";
     var eclAttributeGroup = false;
     records.forEach(function(rec, index) {
@@ -4310,6 +4310,14 @@ this.toRcode = function() {
           if(name == "wildCard")
               {
                   syntax += name + " = (" + name + "('" + display(chars, rec.phraseIndex, rec.phraseLength) + "'))" ;
+              }
+          if(name == "dottedExpressionConstraint")
+              {
+                  syntax += name + " = " + name + "(";
+              }
+          if(name == "dot")
+              {
+                  syntax += ", ";
               }
           if(name == "conceptId")
              {
@@ -4372,13 +4380,20 @@ this.toRcode = function() {
               }
            if(name == "minValue" || name == "maxValue")
               {
-                  syntax += name + " = '" + display(chars, rec.phraseIndex, rec.phraseLength) + "', " ;
+                  if(records[index + 1].name == "many")
+                      {
+                        syntax += name + " = '*', " ;
+                      }
+                  else
+                    {
+                        syntax += name + " = '" + display(chars, rec.phraseIndex, rec.phraseLength) + "', " ;
+                    }
               }
       } 
       else 
       {
           var name = rec.name;
-           if(name == "subExpressionConstraint" || name == "eclFocusConcept" || name == "expressionConstraint" || name == "query" || name == "refinedExpressionConstraint" || name == "conceptReference" || name == "eclRefinement" || name == "subRefinement" || name == "eclAttributeSet" || name == "subAttributeSet" || name == "eclAttribute" || name == "exclusionExpressionConstraint" || name == "compoundExpressionConstraint" || name == "eclAttributeGroup")
+           if(name == "subExpressionConstraint" || name == "eclFocusConcept" || name == "expressionConstraint" || name == "query" || name == "refinedExpressionConstraint" || name == "conceptReference" || name == "eclRefinement" || name == "subRefinement" || name == "eclAttributeSet" || name == "subAttributeSet" || name == "eclAttribute" || name == "exclusionExpressionConstraint" || name == "compoundExpressionConstraint" || name == "eclAttributeGroup" || name == "dottedExpressionConstraint")
              {
                  if(name == "eclAttributeGroup")
                     {
