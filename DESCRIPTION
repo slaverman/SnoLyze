@@ -10,3 +10,5 @@ Depends: R (>= 3.1.0)
 Imports: data.table, bit64, V8
 License: BSD 3-Clause License
 Description: Support data analytics over SNOMED CT enabled data.
+NeedsCompilation: no
+Packaged: 2017-05-18 12:36:52 UTC; Sander

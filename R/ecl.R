@@ -18,12 +18,33 @@ expressionConstraint <- function(refinedExpressionConstraint = NULL, compoundExp
   }
   else
   {
-    return(subExpressionConstraint)
+    if(as.character(subExpressionConstraint[1]) == "*")
+    {
+      return(any())
+    }
+    else
+    {
+      return(subExpressionConstraint)
+    }
   }
 }
 refinedExpressionConstraint <- function(simpleExpressionConstraint, eclRefinement)
 {
-  return(conjunction(simpleExpressionConstraint, eclRefinement))
+  if(as.character(simpleExpressionConstraint[1]) == "*")
+  {
+    if(length(eclRefinement) > 0)
+    {
+      return(unique(eclRefinement))
+    }
+    else
+    {
+      return(eclRefinement)
+    }
+  }
+  else
+  {
+    return(conjunction(simpleExpressionConstraint, eclRefinement))
+  }
 }
 compoundExpressionConstraint <- function(conjunctionExpressionConstraint = NULL ,disjunctionExpressionConstraint = NULL,exclusionExpressionConstraint = NULL)
 {
@@ -42,15 +63,54 @@ compoundExpressionConstraint <- function(conjunctionExpressionConstraint = NULL 
 }
 conjunctionExpressionConstraint <- function(subExpressionConstraint ,conjunction_subExpressionConstraint)
 {
-  return(conjunction(subExpressionConstraint, conjunctionList(conjunction_subExpressionConstraint)))
+  if(as.character(subExpressionConstraint[1]) == "*")
+  {
+    if("character" %in% lapply(conjunction_subExpressionConstraint, class))
+    {
+      return(any())
+    }
+    else
+    {
+      return(conjunctionList(conjunction_subExpressionConstraint))
+    }
+  }
+  else
+  {
+    if("character" %in% lapply(conjunction_subExpressionConstraint, class))
+    {
+      return(subExpressionConstraint)
+    }
+    else
+    {
+      return(conjunction(subExpressionConstraint, conjunctionList(conjunction_subExpressionConstraint)))
+    }
+  }
 }
 disjunctionExpressionConstraint <- function(subExpressionConstraint, disjunction_subExpressionConstraint)
 {
-   return(disjunction(subExpressionConstraint, disjunctionList(disjunction_subExpressionConstraint)))
+  if(as.character(subExpressionConstraint[1]) == "*" | "character" %in% lapply(disjunction_subExpressionConstraint, class))
+  {
+    return(any())
+  }
+  else
+  {
+    return(disjunction(subExpressionConstraint, conjunctionList(disjunction_subExpressionConstraint)))
+  }
 }
 exclusionExpressionConstraint <- function(subExpressionConstraint, exclusion_subExpressionConstraint)
 {
-  return(exclusion(subExpressionConstraint, exclusion_subExpressionConstraint))
+  if(as.character(exclusion_subExpressionConstraint[1]) == "*")
+  {
+    return(emptyVector())
+  }
+  if(as.character(subExpressionConstraint[1]) == "*")
+  {
+    subExpressionConstraint <- any()
+  }
+  else
+  {
+    return(exclusion(subExpressionConstraint, exclusion_subExpressionConstraint))
+  }
 }
 dottedExpressionConstraint <- function(subExpressionConstraint, constraintOperator = NULL, eclAttributeName)
 {
@@ -108,10 +168,6 @@ eclAttributeName <- function(conceptReference = NULL, wildCard = NULL)
     return(wildCard)
   }
 }
-dot <- function()
-{
-  stop("dot is not supported yet")
-}
 memberOf <- function()
 {
   stop("memberOf is not supported yet")
@@ -122,7 +178,7 @@ conceptReference <- function(conceptId)
 }
 wildCard <- function(any)
 {
-  return(self("*"))
+  return(any)
 }
 eclRefinement <- function(subRefinement, conjunctionRefinementSet = NULL, disjunctionRefinementSet = NULL)
 {
@@ -200,9 +256,12 @@ eclAttributeGroup <- function(minValue = NULL, maxValue = NULL, eclAttributeSet)
 {
   if(!is.null(minValue))
   {
-    stop("grouped cardinality is not supported yet")
+    return(cardinalityHandler(FALSE, minValue, maxValue, eclAttributeSet, FALSE, TRUE))
   }
-  return(eclAttributeSet)
+  else
+  {
+    return(eclAttributeSet)
+  }
 }
 eclAttribute <- function(group = FALSE, minValue = NULL, maxValue = NULL, reverseFlag = FALSE, constraintOperator = NULL, eclAttributeName, expressionComparisonOperator = TRUE, subExpressionConstraint)
 {
@@ -215,26 +274,30 @@ eclAttribute <- function(group = FALSE, minValue = NULL, maxValue = NULL, revers
   }
   if(!is.null(minValue))
   {
-    return(cardinalityHandler(group, minValue, maxValue, att, reverseFlag))
+    return(cardinalityHandler(group, minValue, maxValue, att, reverseFlag, FALSE))
   }
   else
   {
     if(reverseFlag)
     {
-      return(unique(att$destinationId))
+      return(att$destinationId)
     }
     else
     {
-      return(unique(att$sourceId))
+      return(att$sourceId)
     }
   }
 }
 expressionComparisonOperator <- function(operator)
 {
   if(operator == "=")
+  {
     return(TRUE)
+  }
   else
+  {
     return(FALSE) # NOT =, <>, !=
+  }
 }
 concept <- function(constraintOperator = NULL, eclFocusConcept)
 {

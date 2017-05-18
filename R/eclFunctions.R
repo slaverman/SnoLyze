@@ -1,99 +1,140 @@
 self <- function(sctid) # INPUT MUST BE A STRING OTHERWISE 999480561000087100 WILL BECOME 999480561000087040
 {
-  if(sctid == "*") # *, ANY
-  {
-    return(any())
-  }
-  else
-  {
     return(as.integer64(sctid))
-  }
 }
 
 descendantOrSelfOf <- function(sctid)
 {
-  if(length(sctid) > 1)
+  if(as.character(sctid) == "*")
   {
     return(any())
   }
   else
   {
-    return(c.integer64(sctid,transitiveclosure[supertypeId == sctid]$subtypeId))
+    descendants <- transitiveclosure[supertypeId == sctid]$subtypeId
+    if(length(descendants) == 0) # check if sctid is a concept
+    {
+      return(emptyVector())
+    }
+    else
+    {
+      return(c.integer64(sctid,descendants))
+    }
   }
 }
 
 descendantOf <- function(sctid)
 {
-  if(length(sctid) > 1)
+  if(as.character(sctid) == "*")
   {
     return(anyExceptRoot())
   }
   else
   {
-    return(transitiveclosure[supertypeId == sctid]$subtypeId)
+    descendants <- transitiveclosure[supertypeId == sctid]$subtypeId
+    if(length(descendants) == 0)
+    {
+      return(emptyVector())
+    }
+    else
+    {
+      return(descendants)
+    }
   }
 }
 
 ancestorOf <- function(sctid)
 {
-  if(length(sctid) > 1)
+  if(as.character(sctid) == "*")
   {
     return(nonLeafConcepts())
   }
   else
   {
-    return(transitiveclosure[subtypeId == sctid]$supertypeId)
+    ancestors <- transitiveclosure[subtypeId == sctid]$supertypeId
+    if(length(ancestors) == 0)
+    {
+      return(emptyVector())
+    }
+    else
+    {
+      return(ancestors)
+    }
   }
 }
 
 ancestorOrSelfOf <- function(sctid)
 {
-  if(length(sctid) > 1)
+  if(as.character(sctid) == "*")
   {
     return(any())
   }
   else
   {
-    return(c.integer64(sctid,transitiveclosure[subtypeId == sctid]$supertypeId))
+    ancestors <- transitiveclosure[subtypeId == sctid]$supertypeId
+    if(length(ancestors) == 0)
+    {
+      return(emptyVector())
+    }
+    else
+    {
+      return(c.integer64(sctid, ancestors))
+    }
   }
 }
 
 parentOf <- function(sctid)
 {
-  if(length(sctid) > 1)
+  if(as.character(sctid) == "*")
   {
     return(nonLeafConcepts())
   }
   else
   {
-    return(transitiveclosure[subtypeId == sctid & pathlength == 1]$supertypeId)
+    parents <- isa[sourceId == sctid]$destinationId
+    if(length(parents) == 0)
+    {
+      return(emptyVector())
+    }
+    else
+    {
+      return(parents)
+    }
   }
 }
 
 childOf <- function(sctid)
 {
-  if(length(sctid) > 1)
+  if(as.character(sctid) == "*")
   {
     return(anyExceptRoot())
   }
   else
   {
-    return(transitiveclosure[supertypeId == sctid & pathlength == 1]$subtypeId)
+    children <- isa[destinationId == sctid]$sourceId
+    if(length(children) == 0)
+    {
+      return(emptyVector())
+    }
+    else
+    {
+      return(children)
+    }
   }
 }
 
 # wildCard functions,for << *, > *, ... faster than selecting unique values in transitiveclosure
 any <- function()
 {
-  return(descendantOrSelfOf(rootconcept))
+  return(c.integer64(rootconcept,unique(isa$sourceId)))
 }
 anyExceptRoot <- function()
 {
-  return(descendantOf(rootconcept))
+  return(unique(isa$sourceId))
 }
 nonLeafConcepts <- function()
 {
-  return(unique(transitiveclosure$supertypeId))
+  return(unique(isa$destinationId))
 }
 emptyVector <- function()
 {
@@ -127,62 +168,83 @@ exclusion <- function(a, b)
 
 getAtt <- function(group, reverseFlag,constraintOperator, eclAttributeName, expressionComparisonOperator, subExpressionConstraint)
 {
-  if(group)
+  att <- rel
+  eclAttribute <- subExpressionConstraint(constraintOperator, eclFocusConcept = eclAttributeName)
+  if(length(eclAttribute) == 0 | length(subExpressionConstraint) == 0)
   {
-    att <- rel[typeId %in% subExpressionConstraint(constraintOperator, eclFocusConcept = eclAttributeName) & relationshipGroup != 0]
+    return(data.table())
   }
-  else
+  if(as.character(eclAttributeName[1]) != "*")
   {
-    att <- rel[typeId %in% subExpressionConstraint(constraintOperator, eclFocusConcept = eclAttributeName)]
-  }
-  if(reverseFlag)
-  {
-    if(expressionComparisonOperator)
+    if(group)
     {
-      return(att[sourceId %in% subExpressionConstraint])
+      att <- att[typeId %in% eclAttribute & relationshipGroup != 0]
     }
     else
     {
-      return(att[!(sourceId %in% subExpressionConstraint)])
+      att <- att[typeId %in% eclAttribute]
     }
   }
-  else
+  if(as.character(subExpressionConstraint[1]) != "*")
   {
-    if(expressionComparisonOperator)
+    if(reverseFlag)
     {
-      return(att[destinationId %in% subExpressionConstraint])
+      if(expressionComparisonOperator)
+      {
+        return(att[sourceId %in% subExpressionConstraint])
+      }
+      else
+      {
+        return(att[!(sourceId %in% subExpressionConstraint)])
+      }
     }
     else
     {
-      return(att[!(destinationId %in% subExpressionConstraint)])
+      if(expressionComparisonOperator)
+      {
+        return(att[destinationId %in% subExpressionConstraint])
+      }
+      else
+      {
+        return(att[!(destinationId %in% subExpressionConstraint)])
+      }
     }
   }
-
+  return(att)
 }
-cardinalityHandler <- function(group, min, max, att, reverseFlag)
+cardinalityHandler <- function(group, min, max, att, reverseFlag, grouped = FALSE)
 {
   min <- as.numeric(min)# prevent that with "2", => 10 is not missed (min is always an numeric so safe)
-
-  if(reverseFlag)
+  if(grouped)
   {
-    if(group)
-    {
-      spec_att <- att[, occurrences:=.N, by= list(destinationId, relationshipGroup)]
-    }
-    else
-    {
-      spec_att <- att[, occurrences:=.N, by= destinationId] # count occurrences of the specified attribute by concept
-    }
+    att <- data.table(att)
+    setnames(att,"att","sourceId")
+    assign("test", att, envir = globalenv())
+    spec_att <- att[, occurrences:=.N, by= sourceId]
   }
   else
   {
-    if(group)
+    if(reverseFlag)
     {
-      spec_att <- att[, occurrences:=.N, by= list(sourceId, relationshipGroup)]
+      if(group)
+      {
+        spec_att <- att[, occurrences:=.N, by= list(destinationId, relationshipGroup)]
+      }
+      else
+      {
+        spec_att <- att[, occurrences:=.N, by= destinationId] # count occurrences of the specified attribute by concept
+      }
     }
     else
     {
-      spec_att <- att[, occurrences:=.N, by= sourceId] # count occurrences of the specified attribute by concept
+      if(group)
+      {
+        spec_att <- att[, occurrences:=.N, by= list(sourceId, relationshipGroup)]
+      }
+      else
+      {
+        spec_att <- att[, occurrences:=.N, by= sourceId] # count occurrences of the specified attribute by concept
+      }
     }
   }
   if(max == "*")
@@ -215,24 +277,23 @@ cardinalityHandler <- function(group, min, max, att, reverseFlag)
       }
     }
   }
-  if(min == "0")
+  if(min == 0)
   {
     if(reverseFlag)
     {
       con <- unique(rel$destinationId) # all unique concepts with attributes
-      ex_spec_att <- exclusion(con, unique(att$destinationId)) # all concepts that have attribute(s), but not the specified attribute
+      ex_spec_att <- exclusion(con, att$destinationId) # all concepts that have attribute(s), but not the specified attribute
     }
     else
     {
-      con <- unique(rel$sourceId) # all unique concepts with attributes
-      ex_spec_att <- exclusion(con, unique(att$sourceId)) # all concepts that have attribute(s), but not the specified attribute
+      ex_spec_att <- exclusion(con, att$sourceId) # all concepts that have attribute(s), but not the specified attribute
     }
-    no_att <- exclusion(any(), con) # all concepts without attributes
+    #no_att <- exclusion(any(), con) # all concepts without attributes
     no_spec_att <- disjunction(ex_spec_att, no_att) # evertything that has not the specified attribute
     return(disjunction(no_spec_att, spec_att))
   }
   else
   {
-    return(unique(spec_att))
+    return(spec_att)
   }
 }

@@ -24,7 +24,7 @@ typeRel <- function(rel, full)
   }
   else
   {
-    return(rel[active == TRUE & typeId == as.integer64("116680003")][,c("sourceId", "typeId", "destinationId")])
+    return(rel[active == TRUE & typeId == as.integer64("116680003")][,c("sourceId", "destinationId")])
   }
 }
 

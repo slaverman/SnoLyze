@@ -4309,7 +4309,7 @@ this.toRcode = function() {
              }
           if(name == "wildCard")
               {
-                  syntax += name + " = (" + name + "('" + display(chars, rec.phraseIndex, rec.phraseLength) + "'))" ;
+                  syntax += name + " = (" + name + "('*'))" ;
               }
           if(name == "dottedExpressionConstraint")
               {
