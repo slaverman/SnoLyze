@@ -2,10 +2,13 @@ Package: SnoLyze
 Version: 0.1.0
 Date: 2017-05-14
 Title: SNOMED CT Expression Constraint Language (ECL) Execution Engine
-Authors@R: person("Sander", "Laverman", role = c("aut", "cre"))
-Author: Sander Laverman [aut, cre]
+Author: Sander Laverman [aut, cre],
+  Daniel Karlsson [aut],
+  Ronald Cornet [aut]
 Maintainer: Sander Laverman <sanderlaverman@gmail.com>
 Depends: R (>= 3.1.0)
 Imports: data.table, bit64, V8
 License: BSD 3-Clause License
 Description: Support data analytics over SNOMED CT enabled data.
+NeedsCompilation: no
+Packaged: 2017-05-18 12:36:52 UTC; Sander
