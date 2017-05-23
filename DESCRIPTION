@@ -11,4 +11,4 @@ Imports: data.table, bit64, V8
 License: BSD 3-Clause License
 Description: Support data analytics over SNOMED CT enabled data.
 NeedsCompilation: no
-Packaged: 2017-05-23 13:51:25 UTC; Sander
+Packaged: 2017-05-23 14:07:15 UTC; Sander

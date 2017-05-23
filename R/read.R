@@ -35,6 +35,6 @@ readTrans <- function(source)
   trans <- fread(source, colClasses = trans_cols, showProgress = FALSE)
   trans$subtypeId <- as.integer64(trans$subtypeId)
   trans$supertypeId <- as.integer64(trans$supertypeId)
-  setkey(trans, subtypeId, supertypeId, pathlength)
+  setkey(trans, subtypeId, supertypeId)
   return(trans)
 }
