@@ -35,11 +35,11 @@ launch <- function(sourceRel, sourceTrans = NULL)
 
   if(!is.null(sourceTrans))
   {
-    transitiveclosure <<- tryCatch(readTrans(sourceTrans), error = function(e){stop("Transitiveclosure file needs to have the following headers; subtypeId, supertypeId, pathlength. \n  Leave the second parameter empty to let SnoLyze create one.")})
+    transitiveclosure <<- tryCatch(readTrans(sourceTrans), error = function(e){stop("Transitiveclosure file needs to have the following headers; subtypeId, supertypeId. \n  Leave the second parameter empty to let SnoLyze create one.")})
   }
   else
   {
-    transitiveclosure <<- createTC(isa)
+    transitiveclosure <<- createTC(copy(isa))
   }
   rel <<- typeRel(rel, TRUE)
   parser <<- createParser()

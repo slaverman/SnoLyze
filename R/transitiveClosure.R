@@ -25,5 +25,5 @@ createTC <- function(rel)
     i <- nrow(a)
   }
   setkey(dt, subtypeId, supertypeId, pathlength)
-  return(dt)
+  return(unique(dt[,1:2]))
 }

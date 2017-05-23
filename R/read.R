@@ -31,7 +31,7 @@ typeRel <- function(rel, full)
 readTrans <- function(source)
 {
   # PathLength numeric instead of integer, parentOf(self("19829001")) 75,9 ms as numeric, 97,3 ms as integer
-  trans_cols <- list(character = c("subtypeId","supertypeId"), numeric = "pathlength")
+  trans_cols <- list(character = c("subtypeId","supertypeId"))
   trans <- fread(source, colClasses = trans_cols, showProgress = FALSE)
   trans$subtypeId <- as.integer64(trans$subtypeId)
   trans$supertypeId <- as.integer64(trans$supertypeId)
