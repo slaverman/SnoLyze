@@ -31,7 +31,7 @@ launch("PATH_TO_SNOMED_CT_SNAPSHOT_RELATIONSHIP_FILE", "PATH_TO_TRANSITIVE_CLOSU
 
 # get transitive closure file, to save it with your favourite filewriter (example below uses fwrite of the data.table package)
 transitive <- getTransitiveClosure()
-fwrite(transitive, "transitive_closure_INT_20170131")
+fwrite(transitive, "transitive_closure_INT_20170131.txt")
 
 # < 19829001 |Disorder of lung| : 116676008 |Associated morphology|  =  79654002 |Edema|
 execute("< 19829001 |Disorder of lung| : 116676008 |Associated morphology|  =  79654002 |Edema|")
