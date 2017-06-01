@@ -14,7 +14,10 @@ descendantOrSelfOf <- function(sctid)
     descendants <- transitiveclosure[supertypeId == sctid]$subtypeId
     if(length(descendants) == 0) # check if sctid is a concept
     {
-      return(emptyVector())
+      if(nrow(isa[sourceId == sctid]) == 0)
+        return(emptyVector())
+      else
+        return(c.integer64(sctid))
     }
     else
     {
