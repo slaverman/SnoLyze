@@ -219,7 +219,6 @@ cardinalityHandler <- function(group, min, max, att, reverseFlag, grouped = FALS
   {
     att <- data.table(att)
     setnames(att,"att","sourceId")
-    assign("test", att, envir = globalenv())
     spec_att <- att[, occurrences:=.N, by= sourceId]
   }
   else
