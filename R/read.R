@@ -10,7 +10,7 @@ readRel <- function(source)
   rel$typeId <- as.integer64(rel$typeId)
   rel$destinationId <- as.integer64(rel$destinationId)
   rel$characteristicTypeId <- as.integer64(rel$characteristicTypeId)
-  setkey(rel, sourceId, typeId, destinationId, relationshipGroup)
+  setkey(rel, typeId)
   return(rel)
 }
 
@@ -35,6 +35,6 @@ readTrans <- function(source)
   trans <- fread(source, colClasses = trans_cols, showProgress = FALSE)
   trans$subtypeId <- as.integer64(trans$subtypeId)
   trans$supertypeId <- as.integer64(trans$supertypeId)
-  setkey(trans, subtypeId, supertypeId)
+  setkey(trans, supertypeId, subtypeId)
   return(trans)
 }

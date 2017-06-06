@@ -12,6 +12,7 @@ packagename <- "SnoLyze"
 # Speed up cardinality with minValue 0
 no_att <- NULL # concepts without attributs for 0 cardinality 25% faster
 con <- NULL # all unique concepts with attributes
+all <- NULL
 
 #' @export
 launch <- function(sourceRel, sourceTrans = NULL)
@@ -28,10 +29,11 @@ launch <- function(sourceRel, sourceTrans = NULL)
   unlockBinding("isa", env)
   unlockBinding("no_att", env)
   unlockBinding("con", env)
+  unlockBinding("all", env)
 
   rel <- tryCatch(readRel(sourceRel), error = function(e){stop("Relationship file is not RF2")})
   isa <<- typeRel(rel, FALSE)
-  setkey(isa, sourceId, destinationId)
+  setkey(isa, destinationId, sourceId)
 
   if(!is.null(sourceTrans))
   {
@@ -42,6 +44,9 @@ launch <- function(sourceRel, sourceTrans = NULL)
     transitiveclosure <<- createTC(copy(isa))
   }
   rel <<- typeRel(rel, TRUE)
+  all <<- data.table(c.integer64(rootconcept,unique(isa$sourceId)))
+  setnames(all, old = "V1", new = "sctid")
+  setkey(all, sctid)
   parser <<- createParser()
   con <<- unique(rel$sourceId)
   no_att <<- exclusion(any(), con)
@@ -52,6 +57,7 @@ launch <- function(sourceRel, sourceTrans = NULL)
   lockBinding("isa", env)
   lockBinding("con", env)
   lockBinding("no_att", env)
+  lockBinding("all", env)
 }
 
 #' @export
@@ -63,22 +69,8 @@ execute <- function(query)
   }
   if(validate(query))
   {
-    result <- eval(parse(text = getRcode()))
-    if(length(result) == 1) # check if concept exists, instead of checking it everytime in self()
-    {
-      if(result %in% transitiveclosure$subtypeId | result == rootconcept)
-      {
-        return(result)
-      }
-      else
-      {
-        return(emptyVector())
-      }
-    }
-    else
-    {
-      return(result)
-    }
+    return(eval(parse(text = getRcode())))
+
   }
   else
   {

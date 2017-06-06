@@ -41,7 +41,6 @@ createParser <- function()
               parser.ast.callbacks[\"memberOf\"] = true;
               parser.ast.callbacks[\"conceptReference\"] = true;
               parser.ast.callbacks[\"conceptId\"] = true;
-              parser.ast.callbacks[\"term\"] = true;
               parser.ast.callbacks[\"wildCard\"] = true;
               parser.ast.callbacks[\"constraintOperator\"] = true;
               parser.ast.callbacks[\"descendantOf\"] = true;

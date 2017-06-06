@@ -1,132 +1,116 @@
 self <- function(sctid) # INPUT MUST BE A STRING OTHERWISE 999480561000087100 WILL BECOME 999480561000087040
 {
-    return(as.integer64(sctid))
+    self <- as.integer64(sctid)
+    if(self %in% any())
+    {
+      return(self)
+    }
+    else
+    {
+      return(emptyVector())
+    }
 }
 
 descendantOrSelfOf <- function(sctid)
 {
-  if(as.character(sctid) == "*")
+  if(length(sctid) == 0)
+  {
+    return(sctid)
+  }
+  else if(as.character(sctid) == "*")
   {
     return(any())
   }
   else
   {
-    descendants <- transitiveclosure[supertypeId == sctid]$subtypeId
-    if(length(descendants) == 0) # check if sctid is a concept
-    {
-      return(emptyVector())
-    }
-    else
-    {
-      return(c.integer64(sctid,descendants))
-    }
+    return(c.integer64(sctid,transitiveclosure[supertypeId == sctid]$subtypeId))
   }
 }
 
 descendantOf <- function(sctid)
 {
-  if(as.character(sctid) == "*")
+  if(length(sctid) == 0)
+  {
+    return(sctid)
+  }
+  else if(as.character(sctid) == "*")
   {
     return(anyExceptRoot())
   }
   else
   {
-    descendants <- transitiveclosure[supertypeId == sctid]$subtypeId
-    if(length(descendants) == 0)
-    {
-      return(emptyVector())
-    }
-    else
-    {
-      return(descendants)
-    }
+    return(transitiveclosure[supertypeId == sctid]$subtypeId)
   }
 }
 
 ancestorOf <- function(sctid)
 {
-  if(as.character(sctid) == "*")
+  if(length(sctid) == 0)
+  {
+    return(sctid)
+  }
+  else if(as.character(sctid) == "*")
   {
     return(nonLeafConcepts())
   }
   else
   {
-    ancestors <- transitiveclosure[subtypeId == sctid]$supertypeId
-    if(length(ancestors) == 0)
-    {
-      return(emptyVector())
-    }
-    else
-    {
-      return(ancestors)
-    }
+    return(transitiveclosure[subtypeId == sctid]$supertypeId)
   }
 }
 
 ancestorOrSelfOf <- function(sctid)
 {
-  if(as.character(sctid) == "*")
+  if(length(sctid) == 0)
+  {
+    return(sctid)
+  }
+  else if(as.character(sctid) == "*")
   {
     return(any())
   }
   else
   {
-    ancestors <- transitiveclosure[subtypeId == sctid]$supertypeId
-    if(length(ancestors) == 0)
-    {
-      return(emptyVector())
-    }
-    else
-    {
-      return(c.integer64(sctid, ancestors))
-    }
+    return(c.integer64(sctid, transitiveclosure[subtypeId == sctid]$supertypeId))
   }
 }
 
 parentOf <- function(sctid)
 {
-  if(as.character(sctid) == "*")
+  if(length(sctid) == 0)
+  {
+    return(sctid)
+  }
+  else if(as.character(sctid) == "*")
   {
     return(nonLeafConcepts())
   }
   else
   {
-    parents <- isa[sourceId == sctid]$destinationId
-    if(length(parents) == 0)
-    {
-      return(emptyVector())
-    }
-    else
-    {
-      return(parents)
-    }
+    return(isa[sourceId == sctid]$destinationId)
   }
 }
 
 childOf <- function(sctid)
 {
-  if(as.character(sctid) == "*")
+  if(length(sctid) == 0)
+  {
+    return(sctid)
+  }
+  else if(as.character(sctid) == "*")
   {
     return(anyExceptRoot())
   }
   else
   {
-    children <- isa[destinationId == sctid]$sourceId
-    if(length(children) == 0)
-    {
-      return(emptyVector())
-    }
-    else
-    {
-      return(children)
-    }
+    return(isa[destinationId == sctid]$sourceId)
   }
 }
 
 # wildCard functions,for << *, > *, ... faster than selecting unique values in transitiveclosure
 any <- function()
 {
-  return(c.integer64(rootconcept,unique(isa$sourceId)))
+  return(all$sctid)
 }
 anyExceptRoot <- function()
 {
@@ -287,7 +271,6 @@ cardinalityHandler <- function(group, min, max, att, reverseFlag, grouped = FALS
     {
       ex_spec_att <- exclusion(con, att$sourceId) # all concepts that have attribute(s), but not the specified attribute
     }
-    #no_att <- exclusion(any(), con) # all concepts without attributes
     no_spec_att <- disjunction(ex_spec_att, no_att) # evertything that has not the specified attribute
     return(disjunction(no_spec_att, spec_att))
   }
