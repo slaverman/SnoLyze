@@ -9,10 +9,12 @@ parser <- NULL
 rootconcept <- as.integer64("138875005")
 packagename <- "SnoLyze"
 
-# Speed up cardinality with minValue 0
+
 no_att <- NULL # concepts without attributs for 0 cardinality 25% faster
-con <- NULL # all unique concepts with attributes
 all <- NULL
+con <- NULL
+anyExceptRoot <- NULL
+nonLeafConcepts <- NULL
 
 #' @export
 launch <- function(sourceRel, sourceTrans = NULL)
@@ -28,8 +30,10 @@ launch <- function(sourceRel, sourceTrans = NULL)
   unlockBinding("parser", env)
   unlockBinding("isa", env)
   unlockBinding("no_att", env)
-  unlockBinding("con", env)
   unlockBinding("all", env)
+  unlockBinding("con", env)
+  unlockBinding("anyExceptRoot", env)
+  unlockBinding("nonLeafConcepts", env)
 
   rel <- tryCatch(readRel(sourceRel), error = function(e){stop("Relationship file is not RF2")})
   isa <<- typeRel(rel, FALSE)
@@ -43,21 +47,24 @@ launch <- function(sourceRel, sourceTrans = NULL)
   {
     transitiveclosure <<- createTC(copy(isa))
   }
+
   rel <<- typeRel(rel, TRUE)
-  all <<- data.table(c.integer64(rootconcept,unique(isa$sourceId)))
-  setnames(all, old = "V1", new = "sctid")
-  setkey(all, sctid)
+  all <<- data.table(sctid = c.integer64(rootconcept,unique(isa$sourceId)))
   parser <<- createParser()
-  con <<- unique(rel$sourceId)
-  no_att <<- exclusion(any(), con)
+  con <<- data.table(sctid = unique(rel$sourceId))
+  no_att <<- exclusion(all, con)
+  nonLeafConcepts <<- data.table(sctid = unique(isa$destinationId))
+  anyExceptRoot <<- data.table(sctid = unique(isa$sourceId))
 
   lockBinding("transitiveclosure", env)
   lockBinding("rel", env)
   lockBinding("parser", env)
   lockBinding("isa", env)
-  lockBinding("con", env)
   lockBinding("no_att", env)
   lockBinding("all", env)
+  unlockBinding("con", env)
+  lockBinding("anyExceptRoot", env)
+  lockBinding("nonLeafConcepts", env)
 }
 
 #' @export

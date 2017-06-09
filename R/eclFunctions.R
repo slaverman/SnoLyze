@@ -1,277 +1,246 @@
 self <- function(sctid) # INPUT MUST BE A STRING OTHERWISE 999480561000087100 WILL BECOME 999480561000087040
 {
     self <- as.integer64(sctid)
-    if(self %in% any())
+
+    if(self %in% all$sctid)
     {
-      return(self)
+      return(data.table(sctid = self))
     }
     else
     {
-      return(emptyVector())
+      return(emptyTable())
     }
+}
+
+emptyTable <- function()
+{
+  return(data.table(sctid = integer64()))
 }
 
 descendantOrSelfOf <- function(sctid)
 {
-  if(length(sctid) == 0)
+  if(is.null(nrow(sctid))) # *
   {
-    return(sctid)
+    return(all)
   }
-  else if(as.character(sctid) == "*")
+  else if(nrow(sctid) == 0)
   {
-    return(any())
+    return(emptyTable())
   }
   else
   {
-    return(c.integer64(sctid,transitiveclosure[supertypeId == sctid]$subtypeId))
+    return(data.table(sctid = c.integer64(sctid$sctid, transitiveclosure[supertypeId == sctid$sctid]$subtypeId)))
   }
 }
 
 descendantOf <- function(sctid)
 {
-  if(length(sctid) == 0)
+  if(is.null(nrow(sctid)))
   {
-    return(sctid)
+    return(anyExceptRoot)
   }
-  else if(as.character(sctid) == "*")
+  else if(nrow(sctid) == 0)
   {
-    return(anyExceptRoot())
+    return(emptyTable())
   }
   else
   {
-    return(transitiveclosure[supertypeId == sctid]$subtypeId)
+    return(data.table(sctid = transitiveclosure[supertypeId == sctid$sctid]$subtypeId))
   }
 }
 
 ancestorOf <- function(sctid)
 {
-  if(length(sctid) == 0)
+  if(is.null(nrow(sctid)))
   {
-    return(sctid)
+    return(nonLeafConcepts)
   }
-  else if(as.character(sctid) == "*")
+  else if(nrow(sctid) == 0)
   {
-    return(nonLeafConcepts())
+    return(emptyTable())
   }
   else
   {
-    return(transitiveclosure[subtypeId == sctid]$supertypeId)
+    return(data.table(sctid = transitiveclosure[subtypeId == sctid$sctid]$supertypeId))
   }
 }
 
 ancestorOrSelfOf <- function(sctid)
 {
-  if(length(sctid) == 0)
+  if(is.null(nrow(sctid)))
   {
-    return(sctid)
+    return(all)
   }
-  else if(as.character(sctid) == "*")
+  else if(nrow(sctid) == 0)
   {
-    return(any())
+    return(emptyTable())
   }
   else
   {
-    return(c.integer64(sctid, transitiveclosure[subtypeId == sctid]$supertypeId))
+    return(data.table(sctid = c.integer64(sctid$sctid, transitiveclosure[subtypeId == sctid$sctid]$supertypeId)))
   }
 }
 
 parentOf <- function(sctid)
 {
-  if(length(sctid) == 0)
+  if(is.null(nrow(sctid)))
   {
-    return(sctid)
+    return(nonLeafConcepts)
   }
-  else if(as.character(sctid) == "*")
+  else if(nrow(sctid) == 0)
   {
-    return(nonLeafConcepts())
+    return(emptyTable())
   }
   else
   {
-    return(isa[sourceId == sctid]$destinationId)
+    return(data.table(sctid = isa[sourceId == sctid$sctid]$destinationId))
   }
 }
 
 childOf <- function(sctid)
 {
-  if(length(sctid) == 0)
+  if(is.null(nrow(sctid)))
   {
-    return(sctid)
+    return(anyExceptRoot)
   }
-  else if(as.character(sctid) == "*")
+  else if(nrow(sctid) == 0)
   {
-    return(anyExceptRoot())
+    return(emptyTable())
   }
   else
   {
-    return(isa[destinationId == sctid]$sourceId)
+    return(data.table(sctid = isa[destinationId == sctid$sctid]$sourceId))
   }
 }
 
-# wildCard functions,for << *, > *, ... faster than selecting unique values in transitiveclosure
-any <- function()
+
+conjunction <- function(a, b, grouped = FALSE)
 {
-  return(all$sctid)
+  if(grouped)
+  {
+    c <- fintersect(a,b)
+  }
+  else
+  {
+    c <- fintersect(a[,"sctid"],b[,"sctid"])
+  }
+  if(nrow(c) == 0)
+  {
+    return(data.table(sctid = integer64(), relationshipGroup = integer64()))
+  }
+  else
+  {
+    return(a[sctid %in% fintersect(a[,"sctid"],b[,"sctid"])$sctid])
+  }
 }
-anyExceptRoot <- function()
+disjunction <- function(a, b, group = FALSE)
 {
-  return(unique(isa$sourceId))
+  if(group)
+  {
+    return(funion(a, b, all = TRUE))
+  }
+  else
+  {
+    return(funion(a[,"sctid"], b[,"sctid"], all = TRUE))
+  }
 }
-nonLeafConcepts <- function()
+exclusion <- function(a, b)
 {
-  return(unique(isa$destinationId))
-}
-emptyVector <- function()
-{
-  return(as.integer64(c()))
+  return(fsetdiff(a[,"sctid"],b[,"sctid"]))
 }
 
-# Cast to data.table, because the setoperations R base are converting integer64 to numerics, so lost of precision, so lost of valid sctid
-conjunction <- function(a, b)
+conjunctionList <- function(a, grouped = FALSE)
 {
-  return(fintersect(data.table(a), setnames(data.table(b), "b", "a"))[,a])
-}
-
-conjunctionList <- function(a)
-{
-  return(Reduce(fintersect, lapply(a, data.table))[,V1])
+  b <- Reduce(fintersect, a)
+  if(nrow(b) == 0)
+  {
+    return(data.table(sctid = integer64(), relationshipGroup = integer64()))
+  }
+  else
+  {
+    return(a[[1]][sctid %in% b$sctid])
+  }
 }
 
 disjunctionList <- function(a)
 {
-  return(Reduce(funion, lapply(a, data.table))[,V1])
+  return(Reduce(funion, a))
 }
 
-disjunction <- function(a, b)
+getAtt <- function(reverseFlag,constraintOperator, eclAttributeName, expressionComparisonOperator, subExpressionConstraint)
 {
-  return(funion(data.table(a), setnames(data.table(b), "b", "a"))[,a])
-}
-exclusion <- function(a, b)
-{
-  return(fsetdiff(data.table(a), setnames(data.table(b), "b", "a"))[,a])
-}
-
-getAtt <- function(group, reverseFlag,constraintOperator, eclAttributeName, expressionComparisonOperator, subExpressionConstraint)
-{
-  att <- rel
+  att <- copy(rel)
   eclAttribute <- subExpressionConstraint(constraintOperator, eclFocusConcept = eclAttributeName)
   if(length(eclAttribute) == 0 | length(subExpressionConstraint) == 0)
   {
     return(data.table())
   }
-  if(as.character(eclAttributeName[1]) != "*")
+  if(is.data.table(eclAttributeName))
   {
-    if(group)
-    {
-      att <- att[typeId %in% eclAttribute & relationshipGroup != 0]
-    }
-    else
-    {
-      att <- att[typeId %in% eclAttribute]
-    }
+      att <- att[typeId %in% eclAttribute$sctid]
   }
-  if(as.character(subExpressionConstraint[1]) != "*")
+  if(is.data.table(subExpressionConstraint))
   {
     if(reverseFlag)
     {
       if(expressionComparisonOperator)
       {
-        return(att[sourceId %in% subExpressionConstraint])
+        return(att[sourceId %in% subExpressionConstraint$sctid])
       }
       else
       {
-        return(att[!(sourceId %in% subExpressionConstraint)])
+        return(att[!(sourceId %in% subExpressionConstraint$sctid)])
       }
     }
     else
     {
       if(expressionComparisonOperator)
       {
-        return(att[destinationId %in% subExpressionConstraint])
+        return(att[destinationId %in% subExpressionConstraint$sctid])
       }
       else
       {
-        return(att[!(destinationId %in% subExpressionConstraint)])
+        return(att[!(destinationId %in% subExpressionConstraint$sctid)])
       }
     }
   }
   return(att)
 }
-cardinalityHandler <- function(group, min, max, att, reverseFlag, grouped = FALSE)
+cardinalityHandler <- function(grouped, group, min, max, att, reverse = FALSE)
 {
   min <- as.numeric(min)# prevent that with "2", => 10 is not missed (min is always an numeric so safe)
-  if(grouped)
+  if(group || grouped)
   {
-    att <- data.table(att)
-    setnames(att,"att","sourceId")
-    spec_att <- att[, occurrences:=.N, by= sourceId]
+    spec_att <- att[, occurrences:=.N, by= list(sctid, relationshipGroup)]
   }
   else
   {
-    if(reverseFlag)
-    {
-      if(group)
-      {
-        spec_att <- att[, occurrences:=.N, by= list(destinationId, relationshipGroup)]
-      }
-      else
-      {
-        spec_att <- att[, occurrences:=.N, by= destinationId] # count occurrences of the specified attribute by concept
-      }
-    }
-    else
-    {
-      if(group)
-      {
-        spec_att <- att[, occurrences:=.N, by= list(sourceId, relationshipGroup)]
-      }
-      else
-      {
-        spec_att <- att[, occurrences:=.N, by= sourceId] # count occurrences of the specified attribute by concept
-      }
-    }
+    spec_att <- att[, occurrences:=.N, by= sctid] # count occurrences of the specified attribute by concept
   }
   if(max == "*")
   {
-    if(reverseFlag)
-    {
-      spec_att <- spec_att[occurrences >= min]$destinationId
-    }
-    else
-    {
-      spec_att <- spec_att[occurrences >= min]$sourceId
-    }
+    spec_att <- spec_att[occurrences >= min]
   }
   else
   {
     max <- as.numeric(max)
     if(min > max)
     {
-      return(emptyVector()) # is valid according to the grammar, always an emtpy vector
+      return(emptyTable())
     }
     else
     {
-      if(reverseFlag)
-      {
-        spec_att <- spec_att[occurrences >= min &occurrences <= max]$destinationId
-      }
-      else
-      {
-        spec_att <- spec_att[occurrences >= min &occurrences <= max]$sourceId
-      }
+      spec_att <- spec_att[occurrences >= min & occurrences <= max]
     }
   }
   if(min == 0)
   {
-    if(reverseFlag)
+    if(reverse)
     {
-      con <- unique(rel$destinationId) # all unique concepts with attributes
-      ex_spec_att <- exclusion(con, att$destinationId) # all concepts that have attribute(s), but not the specified attribute
+      con <- data.table(sctid = unique(rel$destinationId))
     }
-    else
-    {
-      ex_spec_att <- exclusion(con, att$sourceId) # all concepts that have attribute(s), but not the specified attribute
-    }
-    no_spec_att <- disjunction(ex_spec_att, no_att) # evertything that has not the specified attribute
+    ex_spec_att <- exclusion(copy(con)[, relationshipGroup := 0], att) # all concepts that have attribute(s), but not the specified attribute
+    no_spec_att <- disjunction(ex_spec_att, copy(no_att)[, relationshipGroup := 0]) # evertything that has not the specified attribute
     return(disjunction(no_spec_att, spec_att))
   }
   else

@@ -1,6 +1,17 @@
 query <- function(expressionConstraint)
 {
-  return(expressionConstraint)
+  if(is.null(nrow(expressionConstraint)))
+  {
+    return(all$sctid)
+  }
+  else if(nrow(expressionConstraint) == 0)
+  {
+    return(c.integer64(c()))
+  }
+  else
+  {
+    return(unique(expressionConstraint$sctid))
+  }
 }
 expressionConstraint <- function(refinedExpressionConstraint = NULL, compoundExpressionConstraint = NULL, dottedExpressionConstraint = NULL, subExpressionConstraint = NULL)
 {
@@ -20,7 +31,7 @@ expressionConstraint <- function(refinedExpressionConstraint = NULL, compoundExp
   {
     if(as.character(subExpressionConstraint[1]) == "*")
     {
-      return(any())
+      return(all)
     }
     else
     {
@@ -32,14 +43,7 @@ refinedExpressionConstraint <- function(simpleExpressionConstraint, eclRefinemen
 {
   if(as.character(simpleExpressionConstraint[1]) == "*")
   {
-    if(length(eclRefinement) > 0)
-    {
-      return(unique(eclRefinement))
-    }
-    else
-    {
-      return(eclRefinement)
-    }
+    return(eclRefinement)
   }
   else
   {
@@ -114,7 +118,6 @@ exclusionExpressionConstraint <- function(subExpressionConstraint, exclusion_sub
 }
 dottedExpressionConstraint <- function(subExpressionConstraint, constraintOperator = NULL, eclAttributeName)
 {
-  # TODO 1*(ws dot ws [attributeOperator ws] eclAttributeName)
   return(eclAttribute(group = FALSE, minValue = NULL, maxValue = NULL, reverseFlag = TRUE, constraintOperator = constraintOperator, eclAttributeName, expressionComparisonOperator = TRUE, subExpressionConstraint))
 }
 subExpressionConstraint <- function(constraintOperator = NULL, memberOf = NULL, eclFocusConcept = NULL, expressionConstraint = NULL)
@@ -218,15 +221,31 @@ subRefinement <- function(eclAttributeSet = NULL, eclAttributeGroup = NULL, eclR
     return(eclRefinement)
   }
 }
-eclAttributeSet <- function(subAttributeSet, conjunctionAttributeSet = NULL, disjunctionAttributeSet = NULL)
+eclAttributeSet <- function(group = FALSE, subAttributeSet, conjunctionAttributeSet = NULL, disjunctionAttributeSet = NULL)
 {
   if(!is.null(conjunctionAttributeSet))
   {
-    return(conjunction(subAttributeSet,conjunctionAttributeSet))
+    if(!group) # conjunction only on sctid
+    {
+      return(conjunction(subAttributeSet,conjunctionList(lapply(conjunctionAttributeSet, "[", , "sctid"))))
+    }
+    else # conjunction on sctid and relationshipGroup
+    {
+      conjunctionAttributeSet <- conjunctionList(conjunctionAttributeSet)
+      return(conjunction(subAttributeSet,conjunctionAttributeSet, TRUE))
+    }
   }
   else if(!is.null(disjunctionAttributeSet))
   {
-    return(disjunction(subAttributeSet, disjunctionAttributeSet))
+    if(!group)
+    {
+      return(disjunction(subAttributeSet,disjunctionList(lapply(disjunctionAttributeSet, "[", , "sctid"))))
+    }
+    else
+    {
+      disjunctionAttributeSet <- disjunctionList(disjunctionAttributeSet)
+      return(disjunction(subAttributeSet,disjunctionAttributeSet))
+    }
   }
   else
   {
@@ -235,11 +254,11 @@ eclAttributeSet <- function(subAttributeSet, conjunctionAttributeSet = NULL, dis
 }
 conjunctionAttributeSet <- function(subAttributeSet)
 {
-  return(conjunctionList(subAttributeSet))
+  return(subAttributeSet)
 }
 disjunctionAttributeSet <- function(subAttributeSet)
 {
-  return(disjunctionList(subAttributeSet))
+  return(subAttributeSet)
 }
 subAttributeSet <- function(eclAttribute = NULL, eclAttributeSet = NULL)
 {
@@ -256,35 +275,62 @@ eclAttributeGroup <- function(minValue = NULL, maxValue = NULL, eclAttributeSet)
 {
   if(!is.null(minValue))
   {
-    return(cardinalityHandler(FALSE, minValue, maxValue, eclAttributeSet, FALSE, TRUE))
+    set <- cardinalityHandler(FALSE, TRUE, minValue, maxValue, eclAttributeSet)
+    if(nrow(set) == 0)
+    {
+      return(data.table(sctid = integer64(), relationshipGroup = integer64()))
+    }
+    else
+    {
+      return(set[relationshipGroup != 0])
+    }
   }
   else
   {
-    return(eclAttributeSet)
+    if(nrow(eclAttributeSet) == 0)
+    {
+      return(data.table(sctid = integer64(), relationshipGroup = integer64()))
+    }
+    else
+    {
+      return(eclAttributeSet[relationshipGroup != 0])
+    }
   }
 }
-eclAttribute <- function(group = FALSE, minValue = NULL, maxValue = NULL, reverseFlag = FALSE, constraintOperator = NULL, eclAttributeName, expressionComparisonOperator = TRUE, subExpressionConstraint)
+eclAttribute <- function(grouped = FALSE,minValue = NULL, maxValue = NULL, reverseFlag = FALSE, constraintOperator = NULL, eclAttributeName, expressionComparisonOperator = TRUE, subExpressionConstraint)
 {
 
-  att <- getAtt(group, reverseFlag,constraintOperator, eclAttributeName, expressionComparisonOperator, subExpressionConstraint)
+  att <- getAtt(reverseFlag,constraintOperator, eclAttributeName, expressionComparisonOperator, subExpressionConstraint)
 
-  if(nrow(att) == 0) # can not perform unique function on empty vector, cardinality doesn't matter anymore
+  if(nrow(att) == 0)
   {
-    return(emptyVector())
-  }
-  if(!is.null(minValue))
-  {
-    return(cardinalityHandler(group, minValue, maxValue, att, reverseFlag, FALSE))
+    return(data.table(sctid = integer64(), relationshipGroup = numeric()))
   }
   else
   {
     if(reverseFlag)
     {
-      return(att$destinationId)
+      setnames(att, "destinationId", "sctid")
+      if(!is.null(minValue))
+      {
+        return(cardinalityHandler(grouped, FALSE, minValue, maxValue, att[,c("sctid", "relationshipGroup")], TRUE))
+      }
+      else
+      {
+        return(att[,c("sctid", "relationshipGroup")])
+      }
     }
     else
     {
-      return(att$sourceId)
+      setnames(att, "sourceId", "sctid")
+      if(!is.null(minValue))
+      {
+        return(cardinalityHandler(grouped, FALSE, minValue, maxValue, att[,c("sctid", "relationshipGroup")]))
+      }
+      else
+      {
+        return(att[,c("sctid", "relationshipGroup")])
+      }
     }
   }
 }
