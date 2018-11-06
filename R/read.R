@@ -3,13 +3,13 @@
 # Cast to integer64 after reading in, this prevents coercion to numeric (tested)
 readRel <- function(source)
 {
-  rel_cols <- list(logical = "active", character = c("sourceId","destinationId","typeId","characteristicTypeId"), numeric = "relationshipGroup")
+   rel_cols <- list(integer64 = c("sourceId","destinationId","typeId","characteristicTypeId"), integer = c("active", "relationshipGroup"))
   rel_drop <- c("effectiveTime","id","moduleId","modifierId")
   rel <- fread(source, colClasses = rel_cols, drop = rel_drop, showProgress = FALSE)
-  rel$sourceId <- as.integer64(rel$sourceId)
-  rel$typeId <- as.integer64(rel$typeId)
-  rel$destinationId <- as.integer64(rel$destinationId)
-  rel$characteristicTypeId <- as.integer64(rel$characteristicTypeId)
+  #rel$sourceId <- as.integer64(rel$sourceId)
+  #rel$typeId <- as.integer64(rel$typeId)
+  #rel$destinationId <- as.integer64(rel$destinationId)
+  #rel$characteristicTypeId <- as.integer64(rel$characteristicTypeId)
   setkey(rel, sourceId, typeId, destinationId, relationshipGroup)
   return(rel)
 }
